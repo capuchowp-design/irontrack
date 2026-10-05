@@ -1,0 +1,1342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0A0A0F">
+<title>IronTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0A0A0F;
+  color: #F0F0F0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+.grid-bg {
+  background-image: linear-gradient(rgba(28,28,39,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(28,28,39,0.5) 1px, transparent 1px);
+  background-size: 40px 40px;
+  min-height: 100vh;
+}
+.card {
+  background: #13131A;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 16px;
+}
+.card-elevated {
+  background: #1C1C27;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 16px;
+}
+.text-gradient {
+  background: linear-gradient(90deg, #C8FF00, #00E5FF);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.btn-primary {
+  background: linear-gradient(90deg, #C8FF00, #00E5FF);
+  background-size: 200% 200%;
+  color: #0A0A0F;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.accent-text { color: #C8FF00; }
+.secondary-text { color: #6B6B80; }
+.font-display { font-family: 'Space Grotesk', sans-serif; }
+.font-mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Header */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: rgba(10,10,15,0.9);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  z-index: 100;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-logo {
+  width: 32px; height: 32px;
+  background: #C8FF00;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  color: #0A0A0F;
+  font-size: 14px;
+}
+
+/* Bottom Nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: rgba(19,19,26,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  z-index: 100;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  color: #6B6B80;
+  font-size: 10px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  position: relative;
+}
+.nav-item.active { color: #C8FF00; }
+.nav-indicator {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 2px;
+  background: linear-gradient(90deg, #C8FF00, #00E5FF);
+  border-radius: 2px;
+}
+
+/* Content */
+.content {
+  padding: 72px 16px 80px;
+}
+.screen { display: none; }
+.screen.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Stats */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: #13131A;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 16px;
+}
+.stat-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #6B6B80;
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 24px;
+  font-weight: 700;
+  color: #F0F0F0;
+}
+
+/* Streak */
+.streak-bar {
+  display: flex;
+  gap: 4px;
+}
+.streak-dot {
+  width: 8px;
+  height: 32px;
+  border-radius: 4px;
+  background: #1C1C27;
+}
+.streak-dot.active { background: #C8FF00; }
+
+/* Progress bar */
+.progress-container {
+  height: 8px;
+  background: #1C1C27;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #C8FF00, #00E5FF);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+}
+
+/* Timer */
+.timer-ring {
+  width: 128px;
+  height: 128px;
+  margin: 0 auto;
+  position: relative;
+}
+.timer-ring svg {
+  transform: rotate(-90deg);
+}
+.timer-text {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 32px;
+  font-weight: 700;
+}
+.timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.timer-btn {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.timer-btn.play {
+  background: linear-gradient(90deg, #C8FF00, #00E5FF);
+  color: #0A0A0F;
+}
+.timer-btn.reset {
+  background: #1C1C27;
+  color: #6B6B80;
+}
+
+/* Exercise row */
+.exercise-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #13131A;
+  border: 1px solid rgba(255,255,255,0.05);
+  margin-bottom: 8px;
+}
+.exercise-row.completed {
+  background: rgba(200,255,0,0.05);
+  border-color: rgba(200,255,0,0.2);
+}
+.serie-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: #6B6B80;
+  width: 24px;
+}
+.serie-input {
+  background: transparent;
+  border: none;
+  color: #F0F0F0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  text-align: center;
+  width: 48px;
+  outline: none;
+}
+.serie-input:focus { border-bottom: 1px solid #C8FF00; }
+.check-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: #1C1C27;
+  color: #6B6B80;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.check-btn.completed {
+  background: #C8FF00;
+  color: #0A0A0F;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+  background: #1C1C27;
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 400px;
+  width: 100%;
+}
+
+/* Pills */
+.pill {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  background: #13131A;
+  color: #6B6B80;
+}
+.pill.active {
+  background: #C8FF00;
+  color: #0A0A0F;
+}
+
+/* Input */
+.input-dark {
+  background: #1C1C27;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #F0F0F0;
+  font-family: 'Inter', sans-serif;
+  width: 100%;
+  outline: none;
+  font-size: 16px;
+}
+.input-dark:focus { border-color: rgba(200,255,0,0.5); }
+
+/* List item */
+.list-item {
+  background: #13131A;
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.pulse { animation: pulse 2s infinite; }
+
+/* Utility */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.mt-6 { margin-top: 24px; }
+.p-4 { padding: 16px; }
+.px-4 { padding-left: 16px; padding-right: 16px; }
+.py-2 { padding-top: 8px; padding-bottom: 8px; }
+.py-3 { padding-top: 12px; padding-bottom: 12px; }
+.py-4 { padding-top: 16px; padding-bottom: 16px; }
+.text-sm { font-size: 14px; }
+.text-xs { font-size: 12px; }
+.text-lg { font-size: 18px; }
+.text-xl { font-size: 20px; }
+.text-2xl { font-size: 24px; }
+.text-3xl { font-size: 30px; }
+.font-bold { font-weight: 700; }
+.font-semibold { font-weight: 600; }
+.font-medium { font-weight: 500; }
+.text-center { text-align: center; }
+.w-full { width: 100%; }
+.flex-1 { flex: 1; }
+.rounded-xl { border-radius: 12px; }
+.rounded-lg { border-radius: 8px; }
+.space-y-2 > * + * { margin-top: 8px; }
+.space-y-3 > * + * { margin-top: 12px; }
+.space-y-4 > * + * { margin-top: 16px; }
+.space-y-6 > * + * { margin-top: 24px; }
+.flex-wrap { flex-wrap: wrap; }
+.min-w-0 { min-width: 0; }
+.overflow-hidden { overflow: hidden; }
+.overflow-y-auto { overflow-y: auto; }
+.max-h-80vh { max-height: 80vh; }
+.max-w-lg { max-width: 512px; }
+.max-w-sm { max-width: 384px; }
+.z-10 { z-index: 10; }
+.sticky { position: sticky; }
+.top-0 { top: 0; }
+.border-b { border-bottom: 1px solid rgba(255,255,255,0.05); }
+.bg-surface { background: #13131A; }
+.bg-accent-10 { background: rgba(200,255,0,0.1); }
+.text-accent { color: #C8FF00; }
+.text-accent-cyan { color: #00E5FF; }
+.text-accent-secondary { color: #FF4757; }
+</style>
+</head>
+<body>
+<div class="grid-bg">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-brand">
+      <div class="header-logo">IT</div>
+      <span class="font-display font-bold" style="color:#F0F0F0">IronTrack</span>
+    </div>
+    <div id="header-status" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 12px;border-radius:999px;background:rgba(200,255,0,0.1);border:1px solid rgba(200,255,0,0.2)">
+        <div style="width:8px;height:8px;border-radius:50%;background:#C8FF00" class="pulse"></div>
+        <span style="color:#C8FF00;font-size:12px;font-family:'JetBrains Mono',monospace">Em andamento</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+    <!-- HOME SCREEN -->
+    <div id="screen-home" class="screen active space-y-6">
+      <div class="space-y-2">
+        <p id="home-date" class="text-xs secondary-text" style="text-transform:capitalize"></p>
+        <h1 class="font-display text-3xl font-bold" style="color:#F0F0F0">Olá, <span class="text-gradient">Atleta</span> 👋</h1>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8FF00" stroke-width="2"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M6 20v-2a6 6 0 1 1 12 0v2"/></svg>
+            Treinos
+          </div>
+          <div class="stat-value" id="stat-treinos">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            Volume
+          </div>
+          <div class="stat-value"><span id="stat-volume">0</span>k</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4757" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Minutos
+          </div>
+          <div class="stat-value" id="stat-minutos">0</div>
+        </div>
+      </div>
+
+      <div class="card flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div style="width:40px;height:40px;border-radius:12px;background:rgba(200,255,0,0.1);display:flex;align-items:center;justify-content:center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C8FF00" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+          </div>
+          <div>
+            <p class="font-display font-bold" style="color:#F0F0F0"><span id="streak-value">0</span> dias</p>
+            <p class="text-xs secondary-text">Streak de treinos consecutivos</p>
+          </div>
+        </div>
+        <div class="streak-bar" id="streak-bar"></div>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-display font-bold text-lg" style="color:#F0F0F0">Próximo Treino</h2>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8FF00" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div class="card-elevated space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-display font-bold" style="color:#F0F0F0" id="proximo-nome">Push - Peito/Ombro/Tríceps</p>
+              <p class="text-sm mt-1 secondary-text"><span id="proximo-count">7</span> exercícios</p>
+            </div>
+            <button class="btn-primary text-sm py-2 px-4" onclick="iniciarTreino('p1','p1-d1')">
+              Iniciar <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+          <div class="flex flex-wrap gap-2" id="proximo-tags"></div>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <h2 class="font-display font-bold text-lg" style="color:#F0F0F0">Volume Semanal</h2>
+        <div class="card" style="height:200px;display:flex;align-items:flex-end;justify-content:space-around;padding-bottom:40px" id="chart-container">
+          <!-- Barras serão geradas por JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- TREINO SCREEN -->
+    <div id="screen-treino" class="screen space-y-4">
+      <div id="treino-placeholder" class="flex flex-col items-center justify-center text-center space-y-4" style="min-height:60vh">
+        <div style="width:64px;height:64px;border-radius:16px;background:rgba(200,255,0,0.1);display:flex;align-items:center;justify-content:center">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C8FF00" stroke-width="2"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M6 20v-2a6 6 0 1 1 12 0v2"/></svg>
+        </div>
+        <h2 class="font-display text-xl font-bold" style="color:#F0F0F0">Nenhum treino ativo</h2>
+        <p class="secondary-text">Selecione um programa e inicie um treino</p>
+        <button class="btn-primary mt-4" onclick="showScreen('programas')">Ver Programas</button>
+      </div>
+
+      <div id="treino-ativo" style="display:none">
+        <div class="flex items-center justify-between mb-4">
+          <button class="flex items-center gap-1 secondary-text" onclick="showConfirmCancel()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            <span class="text-sm">Voltar</span>
+          </button>
+          <div class="text-right">
+            <p class="font-display font-bold" style="color:#F0F0F0" id="treino-nome">Treino</p>
+            <p class="text-xs secondary-text" id="treino-programa">Programa</p>
+          </div>
+        </div>
+
+        <div class="space-y-2 mb-4">
+          <div class="flex items-center justify-between text-xs">
+            <span class="secondary-text">Progresso</span>
+            <span class="font-mono text-accent" id="progress-text">0/0 séries</span>
+          </div>
+          <div class="progress-container">
+            <div class="progress-fill" id="progress-bar" style="width:0%"></div>
+          </div>
+        </div>
+
+        <!-- Timer -->
+        <div class="card-elevated space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8FF00" stroke-width="2"><line x1="10" y1="2" x2="14" y2="2"/><line x1="12" y1="14" x2="12" y2="2"/><path d="M20.2 20.2c2.04-2.03.02-7.36-5.5-11.9-3.66-3.1-7.66-4.3-10.7-3.3"/></svg>
+              <span class="font-display font-semibold text-sm" style="color:#F0F0F0">Descanso</span>
+            </div>
+            <div class="flex gap-1" id="timer-presets">
+              <button class="pill active" onclick="setTimer(30)">30s</button>
+              <button class="pill" onclick="setTimer(60)">60s</button>
+              <button class="pill" onclick="setTimer(90)">90s</button>
+              <button class="pill" onclick="setTimer(120)">120s</button>
+            </div>
+          </div>
+          <div class="timer-ring">
+            <svg viewBox="0 0 128 128" style="width:100%;height:100%">
+              <circle cx="64" cy="64" r="58" fill="none" stroke="#1C1C27" stroke-width="6"/>
+              <circle id="timer-circle" cx="64" cy="64" r="58" fill="none" stroke="url(#timerGrad)" stroke-width="6" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="0" style="transition:stroke-dashoffset 0.5s"/>
+              <defs>
+                <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#C8FF00"/>
+                  <stop offset="100%" stop-color="#00E5FF"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="timer-text" style="color:#F0F0F0" id="timer-display">01:30</div>
+          </div>
+          <div class="timer-controls">
+            <button class="timer-btn reset" onclick="resetTimer()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            </button>
+            <button class="timer-btn play" onclick="toggleTimer()" id="timer-play-btn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="mt-6 space-y-4" id="exercicios-list"></div>
+
+        <div style="position:fixed;bottom:80px;left:0;right:0;padding:0 16px">
+          <button class="btn-primary w-full justify-center py-4 text-base" onclick="finalizarTreino()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            Finalizar Treino
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRAMAS SCREEN -->
+    <div id="screen-programas" class="screen space-y-6">
+      <div class="flex items-center justify-between">
+        <h1 class="font-display text-2xl font-bold" style="color:#F0F0F0">Programas</h1>
+        <button class="btn-primary" style="width:40px;height:40px;padding:0;justify-content:center" onclick="showAddModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+      <div id="programas-list"></div>
+    </div>
+
+    <!-- HISTORICO SCREEN -->
+    <div id="screen-historico" class="screen space-y-6">
+      <div class="flex items-center justify-between">
+        <h1 class="font-display text-2xl font-bold" style="color:#F0F0F0">Histórico</h1>
+        <button class="pill" id="filter-btn" onclick="toggleFilters()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        </button>
+      </div>
+      <div id="filters-container" style="display:none" class="flex gap-2 mb-4">
+        <button class="pill active" onclick="setPeriodo('semana')">7 dias</button>
+        <button class="pill" onclick="setPeriodo('mes')">30 dias</button>
+        <button class="pill" onclick="setPeriodo('3meses')">3 meses</button>
+        <button class="pill" onclick="setPeriodo('tudo')">Tudo</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <p class="text-xs secondary-text">Treinos</p>
+          <p class="stat-value" id="hist-treinos">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="text-xs secondary-text">Volume Total</p>
+          <p class="stat-value"><span id="hist-volume">0</span>k</p>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <h2 class="font-display font-bold text-lg" style="color:#F0F0F0">Treinos Realizados</h2>
+        <div id="historico-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="bottom-nav" id="bottom-nav">
+    <button class="nav-item active" onclick="showScreen('home')">
+      <div class="nav-indicator"></div>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Início
+    </button>
+    <button class="nav-item" onclick="showScreen('treino')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M6 20v-2a6 6 0 1 1 12 0v2"/></svg>
+      Treino
+    </button>
+    <button class="nav-item" onclick="showScreen('programas')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Programas
+    </button>
+    <button class="nav-item" onclick="showScreen('historico')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      Evolução
+    </button>
+  </div>
+
+  <!-- Modal Confirm Cancel -->
+  <div class="modal-overlay" id="modal-cancel">
+    <div class="modal-content space-y-4">
+      <h3 class="font-display font-bold text-xl text-center" style="color:#F0F0F0">Cancelar treino?</h3>
+      <p class="text-sm text-center secondary-text">Todo o progresso será perdido. Tem certeza?</p>
+      <div class="flex gap-3">
+        <button class="flex-1 py-3 rounded-xl font-medium" style="background:#13131A;color:#F0F0F0;border:none" onclick="hideModal('modal-cancel')">Continuar</button>
+        <button class="flex-1 py-3 rounded-xl font-medium" style="background:#FF4757;color:white;border:none" onclick="cancelarTreino()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Add Programa -->
+  <div class="modal-overlay" id="modal-add">
+    <div class="modal-content space-y-4">
+      <h3 class="font-display font-bold text-xl" style="color:#F0F0F0">Novo Programa</h3>
+      <input type="text" class="input-dark" placeholder="Nome do programa" id="new-programa-nome">
+      <div class="flex gap-3">
+        <button class="flex-1 py-3 rounded-xl font-medium" style="background:#13131A;color:#F0F0F0;border:none" onclick="hideModal('modal-add')">Cancelar</button>
+        <button class="flex-1 py-3 rounded-xl font-bold" style="background:#C8FF00;color:#0A0A0F;border:none" onclick="addPrograma()">Criar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Detalhes Treino -->
+  <div class="modal-overlay" id="modal-detalhes">
+    <div class="modal-content max-w-lg max-h-80vh overflow-y-auto" style="background:#1C1C27;border-radius:16px;padding:0;width:100%">
+      <div class="sticky top-0 p-4 border-b flex items-center justify-between" style="background:#1C1C27;border-color:rgba(255,255,255,0.05)">
+        <div>
+          <h3 class="font-display font-bold text-lg" style="color:#F0F0F0" id="detalhes-nome">Treino</h3>
+          <p class="text-xs secondary-text" id="detalhes-data">Data</p>
+        </div>
+        <button style="padding:8px;border-radius:8px;background:#13131A;border:none;color:#6B6B80" onclick="hideModal('modal-detalhes')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="p-4 space-y-4" id="detalhes-content"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+let programas = [
+  {
+    id: 'p1',
+    nome: 'Push Pull Legs',
+    dias: [
+      {
+        id: 'p1-d1',
+        nome: 'Push - Peito/Ombro/Triceps',
+        exercicios: [
+          { id: 'p1-d1-e1', nome: 'Supino Reto', grupo: 'Peito', series: 4, reps: '8-12', cargaInicial: 60, obs: 'Descer ate 90°' },
+          { id: 'p1-d1-e2', nome: 'Supino Inclinado', grupo: 'Peito', series: 3, reps: '10-12', cargaInicial: 50 },
+          { id: 'p1-d1-e3', nome: 'Crucifixo', grupo: 'Peito', series: 3, reps: '12-15', cargaInicial: 15 },
+          { id: 'p1-d1-e4', nome: 'Desenvolvimento c/ Halteres', grupo: 'Ombro', series: 4, reps: '8-10', cargaInicial: 20 },
+          { id: 'p1-d1-e5', nome: 'Elevacao Lateral', grupo: 'Ombro', series: 3, reps: '12-15', cargaInicial: 10 },
+          { id: 'p1-d1-e6', nome: 'Triceps Corda', grupo: 'Triceps', series: 3, reps: '12-15', cargaInicial: 25 },
+          { id: 'p1-d1-e7', nome: 'Triceps Testa', grupo: 'Triceps', series: 3, reps: '10-12', cargaInicial: 20 },
+        ],
+      },
+      {
+        id: 'p1-d2',
+        nome: 'Pull - Costas/Biceps',
+        exercicios: [
+          { id: 'p1-d2-e1', nome: 'Barra Fixa', grupo: 'Costas', series: 4, reps: '6-10', cargaInicial: 0, obs: 'Peso corporal' },
+          { id: 'p1-d2-e2', nome: 'Remada Curvada', grupo: 'Costas', series: 4, reps: '8-10', cargaInicial: 55 },
+          { id: 'p1-d2-e3', nome: 'Puxada Frontal', grupo: 'Costas', series: 3, reps: '10-12', cargaInicial: 50 },
+          { id: 'p1-d2-e4', nome: 'Remada Unilateral', grupo: 'Costas', series: 3, reps: '10-12', cargaInicial: 22 },
+          { id: 'p1-d2-e5', nome: 'Rosca Direta', grupo: 'Biceps', series: 3, reps: '10-12', cargaInicial: 15 },
+          { id: 'p1-d2-e6', nome: 'Rosca Martelo', grupo: 'Biceps', series: 3, reps: '10-12', cargaInicial: 14 },
+          { id: 'p1-d2-e7', nome: 'Rosca Scott', grupo: 'Biceps', series: 3, reps: '10-12', cargaInicial: 20 },
+        ],
+      },
+      {
+        id: 'p1-d3',
+        nome: 'Legs - Pernas/Core',
+        exercicios: [
+          { id: 'p1-d3-e1', nome: 'Agachamento Livre', grupo: 'Pernas', series: 4, reps: '6-8', cargaInicial: 80, obs: 'Profundidade completa' },
+          { id: 'p1-d3-e2', nome: 'Leg Press', grupo: 'Pernas', series: 4, reps: '10-12', cargaInicial: 140 },
+          { id: 'p1-d3-e3', nome: 'Cadeira Extensora', grupo: 'Pernas', series: 3, reps: '12-15', cargaInicial: 45 },
+          { id: 'p1-d3-e4', nome: 'Mesa Flexora', grupo: 'Pernas', series: 3, reps: '10-12', cargaInicial: 40 },
+          { id: 'p1-d3-e5', nome: 'Stiff', grupo: 'Pernas', series: 3, reps: '10-12', cargaInicial: 50 },
+          { id: 'p1-d3-e6', nome: 'Panturrilha em Pe', grupo: 'Pernas', series: 4, reps: '15-20', cargaInicial: 60 },
+          { id: 'p1-d3-e7', nome: 'Prancha', grupo: 'Core', series: 3, reps: '30-60s', cargaInicial: 0 },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'p2',
+    nome: 'ABC - Full Body',
+    dias: [
+      {
+        id: 'p2-d1',
+        nome: 'A - Peito/Costas',
+        exercicios: [
+          { id: 'p2-d1-e1', nome: 'Supino Reto', grupo: 'Peito', series: 4, reps: '8-12', cargaInicial: 60 },
+          { id: 'p2-d1-e2', nome: 'Remada Curvada', grupo: 'Costas', series: 4, reps: '8-12', cargaInicial: 55 },
+          { id: 'p2-d1-e3', nome: 'Desenvolvimento', grupo: 'Ombro', series: 3, reps: '10-12', cargaInicial: 20 },
+          { id: 'p2-d1-e4', nome: 'Rosca Direta', grupo: 'Biceps', series: 3, reps: '10-12', cargaInicial: 15 },
+          { id: 'p2-d1-e5', nome: 'Triceps Corda', grupo: 'Triceps', series: 3, reps: '12-15', cargaInicial: 25 },
+          { id: 'p2-d1-e6', nome: 'Agachamento', grupo: 'Pernas', series: 3, reps: '10-12', cargaInicial: 60 },
+        ],
+      },
+      {
+        id: 'p2-d2',
+        nome: 'B - Pernas/Ombro',
+        exercicios: [
+          { id: 'p2-d2-e1', nome: 'Agachamento Livre', grupo: 'Pernas', series: 4, reps: '8-10', cargaInicial: 70 },
+          { id: 'p2-d2-e2', nome: 'Leg Press', grupo: 'Pernas', series: 4, reps: '10-12', cargaInicial: 130 },
+          { id: 'p2-d2-e3', nome: 'Desenvolvimento Militar', grupo: 'Ombro', series: 4, reps: '8-10', cargaInicial: 22 },
+          { id: 'p2-d2-e4', nome: 'Elevacao Lateral', grupo: 'Ombro', series: 3, reps: '12-15', cargaInicial: 10 },
+          { id: 'p2-d2-e5', nome: 'Rosca Martelo', grupo: 'Biceps', series: 3, reps: '10-12', cargaInicial: 14 },
+          { id: 'p2-d2-e6', nome: 'Triceps Testa', grupo: 'Triceps', series: 3, reps: '10-12', cargaInicial: 20 },
+        ],
+      },
+      {
+        id: 'p2-d3',
+        nome: 'C - Costas/Bracos',
+        exercicios: [
+          { id: 'p2-d3-e1', nome: 'Barra Fixa', grupo: 'Costas', series: 4, reps: '6-10', cargaInicial: 0 },
+          { id: 'p2-d3-e2', nome: 'Puxada Frontal', grupo: 'Costas', series: 4, reps: '10-12', cargaInicial: 50 },
+          { id: 'p2-d3-e3', nome: 'Remada Unilateral', grupo: 'Costas', series: 3, reps: '10-12', cargaInicial: 20 },
+          { id: 'p2-d3-e4', nome: 'Rosca Scott', grupo: 'Biceps', series: 3, reps: '10-12', cargaInicial: 20 },
+          { id: 'p2-d3-e5', nome: 'Triceps Frances', grupo: 'Triceps', series: 3, reps: '10-12', cargaInicial: 15 },
+          { id: 'p2-d3-e6', nome: 'Cadeira Extensora', grupo: 'Pernas', series: 3, reps: '12-15', cargaInicial: 40 },
+        ],
+      },
+    ],
+  },
+];
+
+let treinosRealizados = [];
+
+// ============ STATE ============
+let treinoEmAndamento = false;
+let programaAtivo = null;
+let diaAtivo = null;
+let exerciciosAtivos = [];
+let startTime = null;
+let timerSeconds = 90;
+let timerInterval = null;
+let timerRunning = false;
+let periodoFiltro = 'mes';
+
+// ============ UTILS ============
+function calcularVolume(treino) {
+  return treino.exerciciosRealizados.reduce((total, ex) => {
+    return total + ex.series.reduce((sTotal, s) => sTotal + s.carga * s.reps, 0);
+  }, 0);
+}
+
+function getDiaSemana(dataStr) {
+  const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+  return dias[new Date(dataStr).getDay()];
+}
+
+function formatDate(date) {
+  return date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+
+// ============ NAVIGATION ============
+function showScreen(screenName) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + screenName).classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navItems = document.querySelectorAll('.nav-item');
+  const index = ['home', 'treino', 'programas', 'historico'].indexOf(screenName);
+  if (index >= 0 && navItems[index]) navItems[index].classList.add('active');
+
+  if (screenName === 'home') renderHome();
+  if (screenName === 'programas') renderProgramas();
+  if (screenName === 'historico') renderHistorico();
+}
+
+// ============ HOME ============
+function renderHome() {
+  const hoje = new Date();
+  document.getElementById('home-date').textContent = formatDate(hoje);
+
+  const ultimaSemana = treinosRealizados.filter(t => {
+    const data = new Date(t.data);
+    const diff = (hoje - data) / (1000 * 60 * 60 * 24);
+    return diff <= 7;
+  });
+
+  const totalTreinos = ultimaSemana.length;
+  const volumeTotal = ultimaSemana.reduce((sum, t) => sum + calcularVolume(t), 0);
+  const minutosTotal = ultimaSemana.reduce((sum, t) => sum + t.duracaoMinutos, 0);
+
+  document.getElementById('stat-treinos').textContent = totalTreinos;
+  document.getElementById('stat-volume').textContent = (volumeTotal / 1000).toFixed(1);
+  document.getElementById('stat-minutos').textContent = minutosTotal;
+
+  // Streak
+  let streak = 0;
+  const datas = [...new Set(treinosRealizados.map(t => t.data.split('T')[0]))].sort().reverse();
+  let checkDate = new Date(hoje);
+  for (let i = 0; i < 30; i++) {
+    const checkStr = checkDate.toISOString().split('T')[0];
+    if (datas.includes(checkStr)) {
+      streak++;
+      checkDate.setDate(checkDate.getDate() - 1);
+    } else if (i > 0) break;
+    else checkDate.setDate(checkDate.getDate() - 1);
+  }
+  document.getElementById('streak-value').textContent = streak;
+
+  const streakBar = document.getElementById('streak-bar');
+  streakBar.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'streak-dot' + (i < streak ? ' active' : '');
+    streakBar.appendChild(dot);
+  }
+
+  // Próximo treino
+  const proximo = programas[0]?.dias[0];
+  if (proximo) {
+    document.getElementById('proximo-nome').textContent = proximo.nome;
+    document.getElementById('proximo-count').textContent = proximo.exercicios.length;
+    const tags = document.getElementById('proximo-tags');
+    tags.innerHTML = '';
+    proximo.exercicios.slice(0, 4).forEach(ex => {
+      const tag = document.createElement('span');
+      tag.style.cssText = 'font-size:12px;padding:4px 8px;border-radius:8px;background:#13131A;color:#6B6B80;border:1px solid rgba(255,255,255,0.05)';
+      tag.textContent = ex.nome;
+      tags.appendChild(tag);
+    });
+  }
+
+  // Chart
+  const chartContainer = document.getElementById('chart-container');
+  chartContainer.innerHTML = '';
+  const chartData = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(hoje);
+    d.setDate(d.getDate() - i);
+    const diaStr = d.toISOString().split('T')[0];
+    const treinosDia = treinosRealizados.filter(t => t.data.startsWith(diaStr));
+    const volume = treinosDia.reduce((sum, t) => sum + calcularVolume(t), 0);
+    chartData.push({
+      dia: getDiaSemana(diaStr),
+      volume: Math.round(volume / 1000 * 10) / 10,
+      isHoje: i === 0
+    });
+  }
+
+  const maxVol = Math.max(...chartData.map(d => d.volume), 1);
+  chartData.forEach(d => {
+    const bar = document.createElement('div');
+    bar.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px';
+    const fill = document.createElement('div');
+    fill.style.cssText = `width:24px;border-radius:6px 6px 0 0;background:${d.isHoje ? '#C8FF00' : '#1C1C27'};transition:height 0.5s ease;height:${(d.volume / maxVol) * 120}px`;
+    const label = document.createElement('span');
+    label.style.cssText = 'font-size:10px;color:#6B6B80;font-family:"JetBrains Mono",monospace';
+    label.textContent = d.dia;
+    bar.appendChild(fill);
+    bar.appendChild(label);
+    chartContainer.appendChild(bar);
+  });
+}
+
+// ============ TREINO ============
+function iniciarTreino(programaId, diaId) {
+  programaAtivo = programaId;
+  diaAtivo = diaId;
+  treinoEmAndamento = true;
+  startTime = Date.now();
+
+  const programa = programas.find(p => p.id === programaId);
+  const dia = programa.dias.find(d => d.id === diaId);
+
+  exerciciosAtivos = dia.exercicios.map(ex => ({
+    exercicioId: ex.id,
+    nome: ex.nome,
+    series: Array.from({ length: ex.series }, (_, i) => ({
+      serieNum: i + 1,
+      reps: parseInt(ex.reps.split('-')[1]) || parseInt(ex.reps) || 10,
+      carga: ex.cargaInicial,
+      concluida: false,
+    })),
+  }));
+
+  document.getElementById('treino-nome').textContent = dia.nome;
+  document.getElementById('treino-programa').textContent = programa.nome;
+  document.getElementById('treino-placeholder').style.display = 'none';
+  document.getElementById('treino-ativo').style.display = 'block';
+  document.getElementById('header-status').style.display = 'block';
+  document.getElementById('bottom-nav').style.display = 'none';
+
+  renderExercicios();
+  updateProgress();
+  showScreen('treino');
+}
+
+function renderExercicios() {
+  const container = document.getElementById('exercicios-list');
+  container.innerHTML = '';
+
+  const programa = programas.find(p => p.id === programaAtivo);
+  const dia = programa.dias.find(d => d.id === diaAtivo);
+
+  dia.exercicios.forEach((exercicio, exIndex) => {
+    const exAtivo = exerciciosAtivos.find(e => e.exercicioId === exercicio.id);
+    const seriesConcluidas = exAtivo?.series.filter(s => s.concluida).length || 0;
+
+    const card = document.createElement('div');
+    card.className = 'card-elevated space-y-3';
+    card.innerHTML = `
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="font-display font-semibold" style="color:#F0F0F0;font-size:14px">${exercicio.nome}</p>
+          <p class="text-xs secondary-text mt-1">${exercicio.grupo}${exercicio.obs ? ' · ' + exercicio.obs : ''}</p>
+        </div>
+        <span class="text-xs font-mono text-accent" style="background:rgba(200,255,0,0.1);padding:4px 8px;border-radius:8px">${seriesConcluidas}/${exercicio.series}</span>
+      </div>
+      <div class="space-y-2" id="series-${exercicio.id}"></div>
+    `;
+    container.appendChild(card);
+
+    const seriesContainer = card.querySelector(`#series-${exercicio.id}`);
+    exAtivo?.series.forEach(serie => {
+      const row = document.createElement('div');
+      row.className = 'exercise-row' + (serie.concluida ? ' completed' : '');
+      row.innerHTML = `
+        <span class="serie-num">${serie.serieNum}</span>
+        <div class="flex items-center gap-1 flex-1">
+          <input type="number" class="serie-input" value="${serie.reps}" onchange="updateSerie('${exercicio.id}', ${serie.serieNum}, 'reps', this.value)">
+          <span class="text-xs secondary-text">reps</span>
+        </div>
+        <div class="flex items-center gap-1 flex-1">
+          <input type="number" step="0.5" class="serie-input" value="${serie.carga}" onchange="updateSerie('${exercicio.id}', ${serie.serieNum}, 'carga', this.value)">
+          <span class="text-xs secondary-text">kg</span>
+        </div>
+        <button class="check-btn${serie.concluida ? ' completed' : ''}" onclick="toggleSerie('${exercicio.id}', ${serie.serieNum})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </button>
+      `;
+      seriesContainer.appendChild(row);
+    });
+  });
+}
+
+function updateSerie(exercicioId, serieNum, field, value) {
+  const ex = exerciciosAtivos.find(e => e.exercicioId === exercicioId);
+  const serie = ex.series.find(s => s.serieNum === serieNum);
+  serie[field] = field === 'concluida' ? value : parseFloat(value) || 0;
+}
+
+function toggleSerie(exercicioId, serieNum) {
+  const ex = exerciciosAtivos.find(e => e.exercicioId === exercicioId);
+  const serie = ex.series.find(s => s.serieNum === serieNum);
+  serie.concluida = !serie.concluida;
+  renderExercicios();
+  updateProgress();
+}
+
+function updateProgress() {
+  const totalSeries = exerciciosAtivos.reduce((sum, ex) => sum + ex.series.length, 0);
+  const concluidas = exerciciosAtivos.reduce((sum, ex) => sum + ex.series.filter(s => s.concluida).length, 0);
+  const progresso = totalSeries > 0 ? (concluidas / totalSeries) * 100 : 0;
+
+  document.getElementById('progress-text').textContent = concluidas + '/' + totalSeries + ' series';
+  document.getElementById('progress-bar').style.width = progresso + '%';
+}
+
+function finalizarTreino() {
+  const duracaoMinutos = Math.round((Date.now() - startTime) / 60000);
+  const treino = {
+    id: 't-' + Date.now(),
+    data: new Date().toISOString(),
+    programaId: programaAtivo,
+    diaId: diaAtivo,
+    nomeTreino: programas.find(p => p.id === programaAtivo).dias.find(d => d.id === diaAtivo).nome,
+    duracaoMinutos,
+    exerciciosRealizados: exerciciosAtivos.filter(ex => ex.series.some(s => s.concluida)),
+  };
+  treinosRealizados.unshift(treino);
+
+  treinoEmAndamento = false;
+  programaAtivo = null;
+  diaAtivo = null;
+  exerciciosAtivos = [];
+
+  document.getElementById('treino-placeholder').style.display = 'flex';
+  document.getElementById('treino-ativo').style.display = 'none';
+  document.getElementById('header-status').style.display = 'none';
+  document.getElementById('bottom-nav').style.display = 'flex';
+
+  showScreen('home');
+}
+
+function cancelarTreino() {
+  treinoEmAndamento = false;
+  programaAtivo = null;
+  diaAtivo = null;
+  exerciciosAtivos = [];
+
+  document.getElementById('treino-placeholder').style.display = 'flex';
+  document.getElementById('treino-ativo').style.display = 'none';
+  document.getElementById('header-status').style.display = 'none';
+  document.getElementById('bottom-nav').style.display = 'flex';
+
+  hideModal('modal-cancel');
+  showScreen('home');
+}
+
+function showConfirmCancel() {
+  document.getElementById('modal-cancel').classList.add('active');
+}
+
+// ============ TIMER ============
+function setTimer(seconds) {
+  timerSeconds = seconds;
+  resetTimer();
+  document.querySelectorAll('#timer-presets .pill').forEach((btn, i) => {
+    btn.classList.toggle('active', [30, 60, 90, 120][i] === seconds);
+  });
+}
+
+function formatTimer(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return m.toString().padStart(2, '0') + ':' + sec.toString().padStart(2, '0');
+}
+
+function updateTimerDisplay() {
+  document.getElementById('timer-display').textContent = formatTimer(timerSeconds);
+  const circumference = 2 * Math.PI * 58;
+  const offset = circumference * (1 - timerSeconds / 90);
+  document.getElementById('timer-circle').style.strokeDashoffset = offset;
+}
+
+function toggleTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    document.getElementById('timer-play-btn').innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+  } else {
+    timerRunning = true;
+    document.getElementById('timer-play-btn').innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+    timerInterval = setInterval(() => {
+      timerSeconds--;
+      updateTimerDisplay();
+      if (timerSeconds <= 0) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+        document.getElementById('timer-play-btn').innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerSeconds = 90;
+  updateTimerDisplay();
+  document.getElementById('timer-play-btn').innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+}
+
+// ============ PROGRAMAS ============
+function renderProgramas() {
+  const container = document.getElementById('programas-list');
+  container.innerHTML = '';
+
+  programas.forEach(programa => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.marginBottom = '12px';
+    card.innerHTML = `
+      <div class="flex items-center justify-between cursor-pointer" onclick="togglePrograma('${programa.id}')">
+        <div class="flex items-center gap-3">
+          <div style="width:40px;height:40px;border-radius:12px;background:rgba(200,255,0,0.1);display:flex;align-items:center;justify-content:center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C8FF00" stroke-width="2"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M6 20v-2a6 6 0 1 1 12 0v2"/></svg>
+          </div>
+          <div>
+            <p class="font-display font-semibold" style="color:#F0F0F0;font-size:14px">${programa.nome}</p>
+            <p class="text-xs secondary-text">${programa.dias.length} dias de treino</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button style="padding:8px;border-radius:8px;background:none;border:none;color:#6B6B80" onclick="event.stopPropagation();editPrograma('${programa.id}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </button>
+          <button style="padding:8px;border-radius:8px;background:none;border:none;color:#6B6B80" onclick="event.stopPropagation();deletePrograma('${programa.id}')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B6B80" stroke-width="2" style="transition:transform 0.3s" id="arrow-${programa.id}"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+      </div>
+      <div id="dias-${programa.id}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.05)"></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+let expandedPrograma = null;
+
+function togglePrograma(programaId) {
+  const diasDiv = document.getElementById('dias-' + programaId);
+  const arrow = document.getElementById('arrow-' + programaId);
+
+  if (expandedPrograma === programaId) {
+    diasDiv.style.display = 'none';
+    arrow.style.transform = 'rotate(0deg)';
+    expandedPrograma = null;
+  } else {
+    // Fechar anterior
+    if (expandedPrograma) {
+      const ant = document.getElementById('dias-' + expandedPrograma);
+      if (ant) {
+        ant.style.display = 'none';
+        document.getElementById('arrow-' + expandedPrograma).style.transform = 'rotate(0deg)';
+      }
+    }
+
+    const programa = programas.find(p => p.id === programaId);
+    diasDiv.innerHTML = '';
+    programa.dias.forEach(dia => {
+      const diaDiv = document.createElement('div');
+      diaDiv.className = 'flex items-center justify-between p-3 rounded-xl';
+      diaDiv.style.cssText = 'background:#13131A;border:1px solid rgba(255,255,255,0.05);margin-bottom:8px';
+      diaDiv.innerHTML = `
+        <div class="flex items-center gap-3">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <div>
+            <p class="font-medium text-sm" style="color:#F0F0F0">${dia.nome}</p>
+            <p class="text-xs secondary-text">${dia.exercicios.length} exercicios</p>
+          </div>
+        </div>
+        <button class="pill active" style="font-size:12px" onclick="iniciarTreino('${programaId}', '${dia.id}')">Iniciar</button>
+      `;
+      diasDiv.appendChild(diaDiv);
+    });
+
+    diasDiv.style.display = 'block';
+    arrow.style.transform = 'rotate(90deg)';
+    expandedPrograma = programaId;
+  }
+}
+
+function showAddModal() {
+  document.getElementById('modal-add').classList.add('active');
+}
+
+function addPrograma() {
+  const nome = document.getElementById('new-programa-nome').value;
+  if (!nome.trim()) return;
+  programas.push({
+    id: 'p-' + Date.now(),
+    nome: nome,
+    dias: [{ id: 'd-' + Date.now(), nome: 'Dia 1', exercicios: [] }]
+  });
+  document.getElementById('new-programa-nome').value = '';
+  hideModal('modal-add');
+  renderProgramas();
+}
+
+function deletePrograma(id) {
+  programas = programas.filter(p => p.id !== id);
+  renderProgramas();
+}
+
+function editPrograma(id) {
+  alert('Edição de programa - funcionalidade em desenvolvimento');
+}
+
+// ============ HISTORICO ============
+function renderHistorico() {
+  const hoje = new Date();
+  const filtrados = treinosRealizados.filter(t => {
+    const data = new Date(t.data);
+    const diff = (hoje - data) / (1000 * 60 * 60 * 24);
+    switch (periodoFiltro) {
+      case 'semana': return diff <= 7;
+      case 'mes': return diff <= 30;
+      case '3meses': return diff <= 90;
+      default: return true;
+    }
+  });
+
+  document.getElementById('hist-treinos').textContent = filtrados.length;
+  document.getElementById('hist-volume').textContent = (filtrados.reduce((sum, t) => sum + calcularVolume(t), 0) / 1000).toFixed(1);
+
+  const container = document.getElementById('historico-list');
+  container.innerHTML = '';
+
+  filtrados.forEach(treino => {
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.onclick = () => showDetalhes(treino);
+    item.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div style="width:40px;height:40px;border-radius:12px;background:rgba(200,255,0,0.1);display:flex;align-items:center;justify-content:center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C8FF00" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <div>
+            <p class="font-display font-semibold text-sm" style="color:#F0F0F0">${treino.nomeTreino}</p>
+            <div class="flex items-center gap-3 mt-1">
+              <span class="text-xs secondary-text flex items-center gap-1">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                ${new Date(treino.data).toLocaleDateString('pt-BR')}
+              </span>
+              <span class="text-xs secondary-text flex items-center gap-1">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                ${treino.duracaoMinutos}min
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="font-mono text-sm font-bold text-accent">${(calcularVolume(treino) / 1000).toFixed(1)}k</p>
+          <p class="text-xs secondary-text">kg</p>
+        </div>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function toggleFilters() {
+  const filters = document.getElementById('filters-container');
+  filters.style.display = filters.style.display === 'none' ? 'flex' : 'none';
+}
+
+function setPeriodo(p) {
+  periodoFiltro = p;
+  document.querySelectorAll('#filters-container .pill').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  renderHistorico();
+}
+
+function showDetalhes(treino) {
+  document.getElementById('detalhes-nome').textContent = treino.nomeTreino;
+  document.getElementById('detalhes-data').textContent = new Date(treino.data).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+
+  const content = document.getElementById('detalhes-content');
+  content.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
+      <div class="card text-center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C8FF00" stroke-width="2" style="margin:0 auto 4px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <p class="font-mono font-bold" style="color:#F0F0F0">${treino.duracaoMinutos}</p>
+        <p class="text-xs secondary-text">minutos</p>
+      </div>
+      <div class="card text-center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00E5FF" stroke-width="2" style="margin:0 auto 4px"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        <p class="font-mono font-bold" style="color:#F0F0F0">${(calcularVolume(treino) / 1000).toFixed(1)}k</p>
+        <p class="text-xs secondary-text">volume (kg)</p>
+      </div>
+      <div class="card text-center">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4757" stroke-width="2" style="margin:0 auto 4px"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M6 20v-2a6 6 0 1 1 12 0v2"/></svg>
+        <p class="font-mono font-bold" style="color:#F0F0F0">${treino.exerciciosRealizados.length}</p>
+        <p class="text-xs secondary-text">exercicios</p>
+      </div>
+    </div>
+    <div class="space-y-3">
+      ${treino.exerciciosRealizados.map(ex => `
+        <div class="card space-y-2">
+          <p class="font-display font-semibold text-sm" style="color:#F0F0F0">${ex.nome}</p>
+          <div class="space-y-1">
+            ${ex.series.map(s => `
+              <div class="flex items-center justify-between py-1 px-2 rounded-lg" style="background:#13131A">
+                <span class="font-mono text-xs secondary-text">Serie ${s.serieNum}</span>
+                <div class="flex items-center gap-4">
+                  <span class="font-mono text-sm" style="color:#F0F0F0">${s.reps} reps</span>
+                  <span class="font-mono text-sm text-accent">${s.carga} kg</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  document.getElementById('modal-detalhes').classList.add('active');
+}
+
+// ============ MODAL ============
+function hideModal(id) {
+  document.getElementById(id).classList.remove('active');
+}
+
+// ============ INIT ============
+document.addEventListener('DOMContentLoaded', function() {
+  renderHome();
+});
+</script>
+
+<!-- Biblioteca de exercícios + editor de programas (ordem importa) -->
+<script src="exercicios.js"></script>
+<script src="irontrack-extra.js"></script>
+</body>
+</html>
