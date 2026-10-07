@@ -56,10 +56,15 @@
   }
   const novoId = () => 'x-' + Date.now() + Math.random().toString(36).slice(2, 6);
   const base = (nome, grupo, img) => ({ id: novoId(), nome, grupo, series: 3, reps: '8-12', cargaInicial: 0, ...(img ? { img } : {}) });
-  const verImg = (nome, src) => { $('pv-box').innerHTML = `<p class="font-display font-bold" style="color:#F0F0F0">${esc(nome)}</p><img class="pvimg" src="${src}"><p class="text-xs secondary-text text-center mt-2">Toque para fechar</p>`; $('pv').classList.add('active'); };
+  const verImg = (nome, src) => { $('pv-box').innerHTML = `<p class="font-display font-bold" style="color:#F0F0F0">${esc(nome)}</p><img class="pvimg" src="${src}" onerror="IT.erro(this)"><p class="text-xs secondary-text text-center mt-2">Toque para fechar</p>`; $('pv').classList.add('active'); };
   window.verImg = e => verImg(e.nome, e.img);
 
   window.IT = {
+    erro: im => {
+      if (!im.dataset.r) { im.dataset.r = 1; const u = im.getAttribute('src'); im.src = u + (u.includes('?') ? '&' : '?') + 'r=' + Date.now(); return; }
+      const d = document.createElement('p'); d.className = 'text-xs'; d.style.cssText = 'color:#FF4757;margin-top:8px;word-break:break-all';
+      d.textContent = 'Imagem não carregou: ' + decodeURI(im.getAttribute('src').split('?')[0]); im.replaceWith(d);
+    },
     nomeProg: v => { EP.nome = v.trim() || EP.nome; salvar(); },
     nomeDia: (di, v) => { EP.dias[di].nome = v.trim() || EP.dias[di].nome; salvar(); },
     addDia: () => { EP.dias.push({ id: novoId(), nome: 'Dia ' + (EP.dias.length + 1), exercicios: [] }); salvar(); renderEd(); },
@@ -73,7 +78,7 @@
     busca: v => { L.q = v; L.n = 40; renderLib(true); },
     grupo: g => { L.g = g; L.n = 40; renderLib(); },
     mais: () => { L.n += 40; renderLib(); },
-    togImg: (el, i) => { const row = el.parentNode.parentNode, im = row.querySelector('img'); if (im) im.remove(); else row.insertAdjacentHTML('beforeend', `<img loading="lazy" src="${IMG_DIR + L.list[i].f}.webp">`); },
+    togImg: (el, i) => { const row = el.parentNode.parentNode, im = row.querySelector('img'); if (im) im.remove(); else row.insertAdjacentHTML('beforeend', `<img src="${IMG_DIR + L.list[i].f}.webp" onerror="IT.erro(this)">`); },
     add: (i, btn) => { const x = L.list[i]; EP.dias[L.di].exercicios.push(base(x.n, x.g, IMG_DIR + x.f + '.webp')); salvar(); btn.textContent = '✓'; setTimeout(() => btn.textContent = '+', 900); },
     custom: () => { const n = prompt('Nome do exercício:'); if (!n || !n.trim()) return; EP.dias[L.di].exercicios.push(base(n.trim(), L.g === 'Todos' ? 'Outro' : L.g)); salvar(); IT.fecharLib(); }
   };
@@ -114,6 +119,18 @@
   setTimer = function (s) { tBase = s; resetTimer(); document.querySelectorAll('#timer-presets .pill').forEach((b, i) => b.classList.toggle('active', [30, 60, 90, 120][i] === s)); };
   resetTimer = function () { clearInterval(timerInterval); timerRunning = false; timerSeconds = tBase; updateTimerDisplay(); $('timer-play-btn').innerHTML = PLAY; };
   updateTimerDisplay = function () { $('timer-display').textContent = formatTimer(timerSeconds); $('timer-circle').style.strokeDashoffset = 364.4 * (1 - timerSeconds / tBase); };
+  // Sinal sonoro: bip curto ao iniciar, 3 bips ao terminar
+  let ac;
+  const bip = (f, t, d) => { try { const o = ac.createOscillator(), g = ac.createGain(), n = ac.currentTime + t; o.type = 'sine'; o.frequency.value = f; o.connect(g); g.connect(ac.destination); g.gain.setValueAtTime(0.0001, n); g.gain.exponentialRampToValueAtTime(0.6, n + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, n + d); o.start(n); o.stop(n + d + 0.05); } catch (e) {} };
+  const _tt = toggleTimer;
+  toggleTimer = function () {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume();
+    if (!timerRunning && timerSeconds <= 0) resetTimer();
+    const estava = timerRunning; _tt();
+    if (!estava && timerRunning) bip(660, 0, 0.18);
+  };
+  const _ud = updateTimerDisplay;
+  updateTimerDisplay = function () { _ud(); if (timerRunning && timerSeconds <= 0 && ac) [0, 0.3, 0.6].forEach(t => bip(988, t, 0.2)); };
   setTimer(90);
   salvar();
 })();
